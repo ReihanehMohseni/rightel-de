@@ -1,0 +1,8 @@
+*.pdf
+*.cpy
+*.pyc
+*.pyo
+*.csv
+*.xls
+*.xlsx
+*test.py
