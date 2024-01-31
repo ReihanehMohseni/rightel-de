@@ -26,7 +26,8 @@ while True:
     try:
         Base.metadata.create_all(psql_engine) 
         break
-    except OperationalError:
+    except OperationalError as e:
+        print(e)
         sleep(0.1)
 
 Session = sessionmaker(bind=psql_engine)
