@@ -12,33 +12,39 @@ services:
       MYSQL_DATABASE: analytics
       MYSQL_USER: nonroot
       MYSQL_PASSWORD: nonroot
-  
+    networks:
+      - rightel_network
+      
   psql_db:
     image: "postgres:9.5.15"
     container_name: psql-container
     ports:
-      - "5432:5433"
+      - "5433:5432"
     environment:
       POSTGRES_ROOT_USER: root
       POSTGRES_ROOT_PASSWORD: root
       POSTGRES_DB: main
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
- 
+    networks:
+      - rightel_network
+
   main:
     build:
       context: main
     environment:
-      POSTGRESQL_CS: 'postgresql+psycopg2://postgres:password@psql_db:5433/main'
+      POSTGRESQL_CS: 'postgresql+psycopg2://postgres:password@psql_db:5432/main'
     depends_on:
       - psql_db
     command: ["python", "./main.py" ]
+    networks:
+      - rightel_network
   
   analytics:
     build:
       context: analytics
     environment:
-      POSTGRESQL_CS: 'postgresql+psycopg2://postgres:password@psql_db:5433/main'
+      POSTGRESQL_CS: 'postgresql+psycopg2://postgres:password@psql_db:5432/main'
       MYSQL_CS: 'mysql+pymysql://nonroot:nonroot@mysql_db/analytics?charset=utf8'
 
     depends_on:
@@ -46,5 +52,11 @@ services:
       - psql_db
       - main
     command: ["python", "./analytics.py" ]
+    networks:
+      - rightel_network
+
+networks:
+  rightel_network:
+    driver: bridge
 
 
