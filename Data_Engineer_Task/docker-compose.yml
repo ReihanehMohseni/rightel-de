@@ -4,6 +4,8 @@ services:
   mysql_db:
     image: "mysql:8.0.27"  # we have the same version of mysql in the prod
     container_name: mysql56-container
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_USER: root
       MYSQL_ROOT_PASSWORD: root
@@ -14,6 +16,8 @@ services:
   psql_db:
     image: "postgres:9.5.15"
     container_name: psql-container
+    ports:
+      - "5432:5433"
     environment:
       POSTGRES_ROOT_USER: root
       POSTGRES_ROOT_PASSWORD: root
