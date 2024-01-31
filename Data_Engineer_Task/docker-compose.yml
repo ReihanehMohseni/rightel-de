@@ -25,7 +25,7 @@ services:
     build:
       context: main
     environment:
-      POSTGRESQL_CS: 'postgresql+psycopg2://postgres:password@psql_db:5432/main'
+      POSTGRESQL_CS: 'postgresql+psycopg2://postgres:password@psql_db:5433/main'
     depends_on:
       - psql_db
     command: ["python", "./main.py" ]
@@ -34,7 +34,7 @@ services:
     build:
       context: analytics
     environment:
-      POSTGRESQL_CS: 'postgresql+psycopg2://postgres:password@psql_db:5432/main'
+      POSTGRESQL_CS: 'postgresql+psycopg2://postgres:password@psql_db:5433/main'
       MYSQL_CS: 'mysql+pymysql://nonroot:nonroot@mysql_db/analytics?charset=utf8'
 
     depends_on:
