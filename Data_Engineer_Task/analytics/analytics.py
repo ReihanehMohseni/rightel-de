@@ -13,7 +13,8 @@ while True:
         break
     except OperationalError:
         sleep(0.1)
+    sleep(10)
+    print(psql_engine)
 print('Connection to PostgresSQL successful.')
 
 # Write the solution here
-|
