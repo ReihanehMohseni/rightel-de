@@ -4,23 +4,31 @@ services:
   mysql_db:
     image: "mysql:8.0.27"  # we have the same version of mysql in the prod
     container_name: mysql56-container
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_USER: root
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: analytics
       MYSQL_USER: nonroot
       MYSQL_PASSWORD: nonroot
-  
+    networks:
+      - rightel_network
+      
   psql_db:
     image: "postgres:9.5.15"
     container_name: psql-container
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_ROOT_USER: root
       POSTGRES_ROOT_PASSWORD: root
       POSTGRES_DB: main
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
- 
+    networks:
+      - rightel_network
+
   main:
     build:
       context: main
@@ -29,6 +37,8 @@ services:
     depends_on:
       - psql_db
     command: ["python", "./main.py" ]
+    networks:
+      - rightel_network
   
   analytics:
     build:
@@ -42,5 +52,11 @@ services:
       - psql_db
       - main
     command: ["python", "./analytics.py" ]
+    networks:
+      - rightel_network
+
+networks:
+  rightel_network:
+    driver: bridge
 
 

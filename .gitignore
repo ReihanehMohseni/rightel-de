@@ -6,3 +6,6 @@
 *.xls
 *.xlsx
 *test.py
+*.log
+venv/
+.env
