@@ -3,6 +3,7 @@ from time import sleep
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 from dotenv import load_dotenv
+import pandas as pd
 
 load_dotenv()
 
@@ -22,8 +23,14 @@ print('Connection to PostgresSQL successful.')
 
 # Write the solution here
 
-with psql_engine.connect() as conn:
-    query = text("SELECT device_id, temperature, location, time FROM devices;")
-    result = conn.execute(query)
-    rows = result.fetchall()
-    print(rows)
+query = text("SELECT device_id, temperature, location, time FROM devices")
+df = pd.read_sql_query(query, psql_engine)
+
+aggregations = df.groupby('device_id').agg(
+    max_temperature=('temperature', 'max'),
+    data_points=('temperature', 'count'),
+    last_location=('location', 'last'),
+    last_time=('time', 'last')
+).reset_index()
+
+print(aggregations)
