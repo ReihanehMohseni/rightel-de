@@ -9,3 +9,6 @@
 *.log
 venv/
 .env
+*/dags
+*/logs
+*/config
