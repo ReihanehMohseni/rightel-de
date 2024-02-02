@@ -74,32 +74,40 @@ def perform_etl(**kwargs):
     query = query.bindparams(start_datetime=start_datetime, end_datetime=end_datetime)
 
     df = pd.read_sql_query(query, psql_engine)
-    df['time'] = df['time'].apply(lambda x: pd.to_datetime(x, unit='s'))
-    print(df)
-    aggregations = df.groupby('device_id').agg(
-        max_temperature=('temperature', 'max'),
-        data_points=('temperature', 'count'),
-        last_location=('location', 'last'),
-        last_time=('time', 'last')).reset_index()
+    if df.shape[0] ==0:
+        return 0
+    else:
+        df['time'] = df['time'].apply(lambda x: pd.to_datetime(x, unit='s'))
+        print(df)
+        aggregations = df.groupby('device_id').agg(
+            max_temperature=('temperature', 'max'),
+            data_points=('temperature', 'count'),
+            last_location=('location', 'last'),
+            last_time=('time', 'last')).reset_index()
 
-    last_location = None
-    total_distances = []
-    for _, row in aggregations.iterrows():
-        if last_location is None:
-            last_location = row['last_location']
-            total_distances.append(0)
-        else:
-            distance = calculate_distance(last_location, row['last_location'])
-            total_distances.append(distance)
-            last_location = row['last_location']
-    aggregations['total_distance'] = total_distances
-    print(aggregations)
+        last_location = None
+        total_distances = []
+        for _, row in aggregations.iterrows():
+            if last_location is None:
+                last_location = row['last_location']
+                total_distances.append(0)
+            else:
+                distance = calculate_distance(last_location, row['last_location'])
+                total_distances.append(distance)
+                last_location = row['last_location']
+        aggregations['total_distance'] = total_distances
+        print(aggregations)
 
-    mysql_engine = create_engine(environ["MYSQL_CS"], pool_pre_ping=True, pool_size=10)
-    with mysql_engine.connect() as mysql_conn:
-        aggregations.to_sql('aggregated_data', mysql_conn, if_exists='replace', index=False)
+        mysql_engine = create_engine(environ["MYSQL_CS"], pool_pre_ping=True, pool_size=10)
+        with mysql_engine.connect() as mysql_conn:
+            aggregations.to_sql('analytics', mysql_conn, if_exists='replace', index=False)
+            query = "SELECT * FROM analytics ORDER BY data_points DESC LIMIT 5"
+            result = mysql_conn.execute(query)
+            rows = result.fetchall()
+            df = pd.DataFrame(rows, columns=result.keys())
+            print(df)
 
-    print('ETL Completed.')
+        print('ETL Completed.')
 
 
 perform_etl_task = PythonOperator(
